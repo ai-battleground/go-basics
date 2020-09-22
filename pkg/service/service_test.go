@@ -1,7 +1,7 @@
 package service_test
 
 import (
-	"github.com/rhoegg/protege/pkg/service"
+	"github.com/ai-battleground/go-basics/pkg/service"
 	"github.com/smartystreets/assertions/should"
 	"github.com/smartystreets/gunit"
 	"testing"
