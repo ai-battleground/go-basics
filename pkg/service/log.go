@@ -33,7 +33,7 @@ func (l Logger) Debugf(msg string, parms ...interface{}) {
 }
 
 func (l Logger) emit(msg string, level string) {
-	log.Printf("%s %s %s %s", time.Now().Format(LogTimestampFormat), level, l.Prefix, msg)
+	log.Printf("%s %s %s %s\n", time.Now().Format(LogTimestampFormat), level, l.Prefix, msg)
 }
 
 func (l Logger) WithPrefix(prefix string) Logger {
