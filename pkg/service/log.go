@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const LogTimestampFormat = "2006-01-02 15:04:05.999" // prettier than RFC3339Nano
+const LogTimestampFormat = "2006-01-02 15:04:05.000" // prettier than RFC3339Nano, fixed width
 
 type Logger struct {
 	IsDebug         bool
