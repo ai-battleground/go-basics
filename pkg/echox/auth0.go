@@ -75,12 +75,12 @@ func (api Auth0Api) Middleware() func(handlerFunc echo.HandlerFunc) echo.Handler
 	}
 }
 
-func getToken(c echo.Context) *jwt.Token {
+func (api Auth0Api) ContextToken(c echo.Context) *jwt.Token {
 	return c.Request().Context().Value("user").(*jwt.Token)
 }
 
 func (api Auth0Api) ContextUserInfo(c echo.Context) (UserInfo, error) {
-	return api.UserInfo(getToken(c))
+	return api.UserInfo(api.ContextToken(c))
 }
 
 func (api Auth0Api) UserInfo(token *jwt.Token) (UserInfo, error) {
