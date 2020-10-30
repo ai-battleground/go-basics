@@ -36,7 +36,7 @@ type Auth0Api struct {
 	Audience string
 }
 
-func (api Auth0Api) jwtMiddleware() func(handlerFunc echo.HandlerFunc) echo.HandlerFunc {
+func (api Auth0Api) Middleware() func(handlerFunc echo.HandlerFunc) echo.HandlerFunc {
 	auth0Middleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 
@@ -51,7 +51,7 @@ func (api Auth0Api) jwtMiddleware() func(handlerFunc echo.HandlerFunc) echo.Hand
 				return token, errors.New("Invalid issuer.")
 			}
 
-			cert, err := api.getPemCert(token)
+			cert, err := api.PemCert(token)
 			if err != nil {
 				panic(err.Error())
 			}
@@ -79,11 +79,11 @@ func getToken(c echo.Context) *jwt.Token {
 	return c.Request().Context().Value("user").(*jwt.Token)
 }
 
-func (api Auth0Api) getContextUserInfo(c echo.Context) (UserInfo, error) {
-	return api.getUserInfo(getToken(c))
+func (api Auth0Api) ContextUserInfo(c echo.Context) (UserInfo, error) {
+	return api.UserInfo(getToken(c))
 }
 
-func (api Auth0Api) getUserInfo(token *jwt.Token) (UserInfo, error) {
+func (api Auth0Api) UserInfo(token *jwt.Token) (UserInfo, error) {
 	requestUrl, _ := url.Parse(fmt.Sprintf("%suserinfo", api.Tenant))
 	req := &http.Request{
 		Method: "GET",
@@ -106,7 +106,7 @@ func (api Auth0Api) getUserInfo(token *jwt.Token) (UserInfo, error) {
 	return user, err
 }
 
-func (api Auth0Api) getPemCert(token *jwt.Token) (string, error) {
+func (api Auth0Api) PemCert(token *jwt.Token) (string, error) {
 	cert := ""
 	resp, err := http.Get(fmt.Sprintf("%s.well-known/jwks.json", api.Tenant))
 
