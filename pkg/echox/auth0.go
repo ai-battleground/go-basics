@@ -67,7 +67,7 @@ func (api Auth0Api) Middleware() func(handlerFunc echo.HandlerFunc) echo.Handler
 			err := auth0Middleware.CheckJWT(c.Response().Writer, c.Request())
 			if err != nil {
 				c.Logger().Error("JWT check failed")
-				return err
+				return echo.ErrUnauthorized
 			}
 
 			return handlerFunc(c)
