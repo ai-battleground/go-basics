@@ -7,9 +7,7 @@ import (
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
-	"io/ioutil"
 	"net/http"
-	"net/url"
 )
 
 type Jwks struct {
@@ -25,15 +23,22 @@ type JSONWebKeys struct {
 	X5c []string `json:"x5c"`
 }
 
-type UserInfo struct {
-	Subject string `json:"sub"`
-	Name    string `json:"name,omitempty"`
-	Raw     string `json:"-"`
-}
-
 type Auth0Api struct {
 	Tenant   string
 	Audience string
+	cache    *cache
+}
+
+func New(tenant, audience string) Auth0Api {
+	return Auth0Api{
+		Tenant:   tenant,
+		Audience: audience,
+		cache:    newCache(1000),
+	}
+}
+
+func (api Auth0Api) SetCacheMaxAge(age int32) {
+	api.cache.maxAgeMs = age
 }
 
 func (api Auth0Api) Middleware() func(handlerFunc echo.HandlerFunc) echo.HandlerFunc {
@@ -81,29 +86,6 @@ func (api Auth0Api) ContextToken(c echo.Context) *jwt.Token {
 
 func (api Auth0Api) ContextUserInfo(c echo.Context) (UserInfo, error) {
 	return api.UserInfo(api.ContextToken(c))
-}
-
-func (api Auth0Api) UserInfo(token *jwt.Token) (UserInfo, error) {
-	requestUrl, _ := url.Parse(fmt.Sprintf("%suserinfo", api.Tenant))
-	req := &http.Request{
-		Method: "GET",
-		URL:    requestUrl,
-		Header: map[string][]string{
-			"Authorization": {"Bearer " + token.Raw},
-		},
-	}
-	resp, err := http.DefaultClient.Do(req)
-	var user UserInfo
-	if err == nil {
-		//err = json.NewDecoder(resp.Body).Decode(&user)
-		respBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return user, err
-		}
-		err = json.Unmarshal(respBytes, &user)
-		user.Raw = string(respBytes)
-	}
-	return user, err
 }
 
 func (api Auth0Api) PemCert(token *jwt.Token) (string, error) {
